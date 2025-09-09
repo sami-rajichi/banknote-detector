@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banknote Detection Model Evaluation Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .executive-summary {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .executive-summary h2 {
+            color: white;
+            border-bottom: 3px solid white;
+        }
+        
+        .methodology {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #28a745;
+        }
+        
+        .experiment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .experiment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .experiment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .experiment-card.recommended {
+            border: 3px solid #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+        
+        .experiment-card.recommended::before {
+            content: "⭐ RECOMMENDED";
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .experiment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .model-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-early-stopped { background: #fff3cd; color: #856404; }
+        .status-fine-tuned { background: #d1ecf1; color: #0c5460; }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .performance-note {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #6c757d;
+            margin-top: 15px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .best-score {
+            background: #d4edda !important;
+            font-weight: bold;
+            color: #155724;
+        }
+        
+        .config-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .recommendations {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+        }
+        
+        .recommendations h2 {
+            color: white;
+            border-bottom: 3px solid white;
+        }
+        
+        .recommendation-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .technical-specs {
+            background: #343a40;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+        
+        .inference-settings {
+            background: #17a2b8;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 8px;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+        
+        /* New styles for training args */
+        .training-args-toggle {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .toggle-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: #2980b9;
+        }
+        
+        .training-args {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8em;
+            overflow-x: auto;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .training-args pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .args-highlight {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        /* New styles for experiment images */
+        .experiment-images {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .image-container {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .image-caption {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 Banknote Detection Model Evaluation</h1>
+            <div class="subtitle">Comprehensive Analysis of YOLO Model Performance</div>
+        </div>
+        
+        <div class="content">
+            <!-- Executive Summary -->
+            <div class="executive-summary">
+                <h2>📋 Executive Summary</h2>
+                <p>This report presents the results of four comprehensive experiments conducted to develop an optimal banknote detection system using state-of-the-art YOLO models. The evaluation focused on accuracy, precision, recall, and practical deployment considerations.</p>
+                
+                <div style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <strong>Key Finding:</strong> YOLO11x demonstrated the best balance of accuracy and practical performance, achieving 98.37% mAP50 while maintaining robust detection capabilities with minimal false positives.
+                </div>
+            </div>
+            
+            <!-- Inference Settings -->
+            <div class="inference-settings">
+                <h2>⚙️ Standardized Inference Configuration</h2>
+                <p>All models were evaluated using consistent inference parameters to ensure fair comparison:</p>
+                <div style="margin-top: 15px; font-family: 'Courier New', monospace;">
+                    <strong>Confidence Threshold:</strong> 0.6 &nbsp;&nbsp;&nbsp;
+                    <strong>IoU Threshold:</strong> 0.55 &nbsp;&nbsp;&nbsp;
+                    <strong>Device:</strong> CUDA &nbsp;&nbsp;&nbsp;
+                    <strong>Precision:</strong> AMP + Half Precision
+                </div>
+            </div>
+            
+            <!-- Methodology -->
+            <div class="section methodology">
+                <h2>🔬 Methodology & Approach</h2>
+                <p><strong>Objective:</strong> Develop a robust banknote detection system capable of identifying banknotes in various scenarios (near/far, different lighting conditions, multiple orientations).</p>
+                
+                <h3>Experimental Design:</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Dataset:</strong> Custom annotated banknote dataset with diverse scenarios</li>
+                    <li><strong>Model Architecture:</strong> Comparison between YOLO11 (l/x) and YOLO12l variants</li>
+                    <li><strong>Training Strategy:</strong> Transfer learning with backbone freezing for efficient training</li>
+                    <li><strong>Evaluation Criteria:</strong> mAP50, mAP50-95, Precision, Recall, and qualitative performance</li>
+                </ul>
+                
+                <h3>Key Innovations:</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Optimized augmentation strategies for small object detection</li>
+                    <li>Multi-stage fine-tuning approach</li>
+                    <li>Single-class optimization for banknote-specific detection</li>
+                </ul>
+            </div>
+            
+            <!-- Experiments -->
+            <div class="section">
+                <h2>🧪 Experimental Results</h2>
+                
+                <div class="experiment-grid">
+                    <!-- Experiment 1: YOLO11l -->
+                    <div class="experiment-card">
+                        <div class="experiment-header">
+                            <div class="model-name">YOLO11l</div>
+                            <div class="status-badge status-completed">Completed</div>
+                        </div>
+                        
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">0.9869</div>
+                                <div class="metric-label">mAP50</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 98.69%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.8371</div>
+                                <div class="metric-label">mAP50-95</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 83.71%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9981</div>
+                                <div class="metric-label">Precision</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 99.81%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9519</div>
+                                <div class="metric-label">Recall</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 95.19%"></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="config-details">
+                            <strong>Key Config:</strong> imgsz=832, freeze=8, single_cls=True, epochs=80
+                            <br><strong>Inference Speed:</strong> 29.3ms per image
+                        </div>
+                        
+                        <div class="performance-note">
+                            <strong>Performance Analysis:</strong> High precision but tends to produce false positives. Can detect obvious banknotes effectively but may misclassify other objects as banknotes in challenging scenarios.
+                        </div>
+                        
+                        <!-- YOLO11l Images -->
+                        <div class="experiment-images">
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/2ywcgafjf9c88o1rfcn9k/confusion_matrix.png?rlkey=q258880hezy2xi831zem316ey&st=o28tjf2e&raw=1" alt="YOLO11l Confusion Matrix">
+                                <div class="image-caption">Confusion Matrix - YOLO11l</div>
+                            </div>
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/he5dyz1qpukbuxbsmooop/results.png?rlkey=rq52zu1n43outo543p78tn9ol&st=3m291q9a&raw=1" alt="YOLO11l Training Results">
+                                <div class="image-caption">Training Results - YOLO11l</div>
+                            </div>
+                        </div>
+                        
+                        <div class="training-args-toggle">
+                            <button class="toggle-btn" onclick="toggleArgs('yolo11l-args')">Show Training Arguments</button>
+                        </div>
+                        
+                        <div id="yolo11l-args" class="training-args">
+                            <pre>task: detect
+mode: train
+model: ./model_training/base_models/yolo11l.pt
+data: ./annotated_banknote_dataset/data.yaml
+epochs: 80
+time: null
+patience: 8
+batch: 0.9
+imgsz: 832
+save: true
+save_period: -1
+cache: disk
+device: '0'
+workers: 0
+project: ./model_outputs
+name: banknote_detection_yolo11l
+exist_ok: true
+pretrained: true
+optimizer: AdamW
+verbose: true
+seed: 0
+deterministic: true
+single_cls: true
+rect: false
+cos_lr: false
+close_mosaic: 20
+resume: false
+amp: true
+fraction: 1.0
+profile: false
+freeze: 8
+multi_scale: false
+overlap_mask: true
+mask_ratio: 4
+dropout: 0.0
+val: true
+split: val
+save_json: false
+conf: null
+iou: 0.7
+max_det: 300
+half: false
+dnn: false
+plots: true
+source: null
+vid_stride: 1
+stream_buffer: false
+visualize: false
+augment: false
+agnostic-nms: false
+classes: null
+retina_masks: false
+embed: null
+show: false
+save_frames: false
+save_txt: false
+save_conf: false
+save_crop: false
+show_labels: true
+show_conf: true
+show_boxes: true
+line_width: null
+format: torchscript
+keras: false
+optimize: false
+int8: false
+dynamic: false
+simplify: true
+opset: null
+workspace: null
+nms: false
+lr0: 0.001
+lrf: 0.05
+momentum: 0.937
+weight_decay: 0.01
+warmup_epochs: 8
+warmup_momentum: 0.8
+warmup_bias_lr: 0.1
+box: 10.0
+cls: 0.2
+dfl: 2.5
+pose: 12.0
+kobj: 1.0
+nbs: 64
+hsv_h: 0.008
+hsv_s: 0.3
+hsv_v: 0.2
+degrees: 5.0
+translate: 0.2
+scale: 0.9
+shear: 0.5
+perspective: 0.001
+flipud: 0.0
+fliplr: 0.5
+bgr: 0.0
+mosaic: 0.8
+mixup: 0.1
+cutmix: 0.0
+copy_paste: 0.4
+copy_paste_mode: flip
+auto_augment: randaugment
+erasing: 0.4
+cfg: null
+tracker: botsort.yaml
+save_dir: model_outputs\banknote_detection_yolo11l</pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Experiment 2: YOLO11x (RECOMMENDED) -->
+                    <div class="experiment-card recommended">
+                        <div class="experiment-header">
+                            <div class="model-name">YOLO11x</div>
+                            <div class="status-badge status-early-stopped">Early Stopped (Epoch 30)</div>
+                        </div>
+                        
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">0.9838</div>
+                                <div class="metric-label">mAP50</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 98.38%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.7572</div>
+                                <div class="metric-label">mAP50-95</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 75.72%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9872</div>
+                                <div class="metric-label">Precision</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 98.72%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9499</div>
+                                <div class="metric-label">Recall</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 94.99%"></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="config-details">
+                            <strong>Key Config:</strong> imgsz=640, freeze=10, single_cls=False, workers=6
+                            <br><strong>Inference Speed:</strong> 34.0ms per image
+                        </div>
+                        
+                        <div class="performance-note">
+                            <strong>Performance Analysis:</strong> Optimal balance of accuracy and reliability. Successfully detects most existing banknotes while maintaining low false positive rate. Demonstrates robust performance across various scenarios.
+                        </div>
+                        
+                        <!-- YOLO11x Images -->
+                        <div class="experiment-images">
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/mcwr1ov6xbv99y4nmisft/confusion_matrix.png?rlkey=69p8t8snj6mtxhnp3mk76sqrq&st=4a5n94ii&raw=1" alt="YOLO11x Confusion Matrix">
+                                <div class="image-caption">Confusion Matrix - YOLO11x</div>
+                            </div>
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/y77pz5d4cwlwwf44dibar/results.png?rlkey=dk4vtrjv3oikp7w5nrji2o9bd&st=bcaxeb1j&raw=1" alt="YOLO11x Training Results">
+                                <div class="image-caption">Training Results - YOLO11x</div>
+                            </div>
+                        </div>
+                        
+                        <div class="training-args-toggle">
+                            <button class="toggle-btn" onclick="toggleArgs('yolo11x-args')">Show Training Arguments</button>
+                        </div>
+                        
+                        <div id="yolo11x-args" class="training-args">
+                            <pre>task: detect
+mode: train
+model: ./model_training/base_models/yolo11x.pt
+data: ./annotated_banknote_dataset/data.yaml
+epochs: 100
+time: null
+patience: 8
+batch: 0.9
+imgsz: 640
+save: true
+save_period: -1
+cache: disk
+device: '0'
+workers: 6
+project: ./model_outputs
+name: banknote_detection_yolo11x_outputs
+exist_ok: true
+pretrained: ./model_training/base_models/yolo11x.pt
+optimizer: AdamW
+verbose: true
+seed: 42
+deterministic: true
+single_cls: false
+rect: false
+cos_lr: false
+close_mosaic: 10
+resume: false
+amp: true
+fraction: 1.0
+profile: false
+freeze: 10
+multi_scale: false
+overlap_mask: true
+mask_ratio: 4
+dropout: 0.1
+val: true
+split: val
+save_json: false
+conf: null
+iou: 0.7
+max_det: 300
+half: false
+dnn: false
+plots: true
+source: null
+vid_stride: 1
+stream_buffer: false
+visualize: false
+augment: false
+agnostic-nms: false
+classes: null
+retina_masks: false
+embed: null
+show: false
+save_frames: false
+save_txt: false
+save_conf: false
+save_crop: false
+show_labels: true
+show_conf: true
+show_boxes: true
+line_width: null
+format: torchscript
+keras: false
+optimize: false
+int8: false
+dynamic: false
+simplify: true
+opset: null
+workspace: null
+nms: false
+lr0: 0.001
+lrf: 0.05
+momentum: 0.937
+weight_decay: 0.008
+warmup_epochs: 3
+warmup_momentum: 0.8
+warmup_bias_lr: 0.1
+box: 9.0
+cls: 0.25
+dfl: 2
+pose: 12.0
+kobj: 1.0
+nbs: 64
+hsv_h: 0.015
+hsv_s: 0.5
+hsv_v: 0.3
+degrees: 8.0
+translate: 0.15
+scale: 0.8
+shear: 1.5
+perspective: 0.0008
+flipud: 0.0
+fliplr: 0.5
+bgr: 0.0
+mosaic: 0.5
+mixup: 0.2
+cutmix: 0.0
+copy_paste: 0.0
+copy_paste_mode: flip
+auto_augment: randaugment
+erasing: 0.2
+cfg: null
+tracker: botsort.yaml
+save_dir: model_outputs\banknote_detection_yolo11x_outputs</pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Experiment 3: YOLO12l -->
+                    <div class="experiment-card">
+                        <div class="experiment-header">
+                            <div class="model-name">YOLO12l</div>
+                            <div class="status-badge status-completed">Completed</div>
+                        </div>
+                        
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">0.9798</div>
+                                <div class="metric-label">mAP50</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 97.98%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.7420</div>
+                                <div class="metric-label">mAP50-95</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 74.20%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9930</div>
+                                <div class="metric-label">Precision</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 99.30%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9535</div>
+                                <div class="metric-label">Recall</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 95.35%"></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="config-details">
+                            <strong>Key Config:</strong> imgsz=860, freeze=12, single_cls=True, epochs=100
+                            <br><strong>Inference Speed:</strong> 27.2ms per image
+                        </div>
+                        
+                        <div class="performance-note">
+                            <strong>Performance Analysis:</strong> Good detection capability but prone to false positives. Performance is better than YOLO11l but still shows occasional misclassification of non-banknote objects.
+                        </div>
+                        
+                        <!-- YOLO12l Images -->
+                        <div class="experiment-images">
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/4vahofdmuq95bt3fem2p6/confusion_matrix.png?rlkey=a7k2ujurfglvge4hrgli1hfq8&st=hst12djx&raw=1" alt="YOLO12l Confusion Matrix">
+                                <div class="image-caption">Confusion Matrix - YOLO12l</div>
+                            </div>
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/e6o1tcynoup64kxrnbt0y/results.png?rlkey=x8uwixga7egszxb99od9tpog7&st=xmgjyx81&raw=1" alt="YOLO12l Training Results">
+                                <div class="image-caption">Training Results - YOLO12l</div>
+                            </div>
+                        </div>
+                        
+                        <div class="training-args-toggle">
+                            <button class="toggle-btn" onclick="toggleArgs('yolo12l-args')">Show Training Arguments</button>
+                        </div>
+                        
+                        <div id="yolo12l-args" class="training-args">
+                            <pre>task: detect
+mode: train
+model: model_outputs\banknote_detection_yolo12l_outputs\weights\last.pt
+data: ./annotated_banknote_dataset/data.yaml
+epochs: 100
+time: null
+patience: 8
+batch: 0.9
+imgsz: 860
+save: true
+save_period: -1
+cache: disk
+device: '0'
+workers: 6
+project: ./model_outputs
+name: banknote_detection_yolo12l_outputs
+exist_ok: true
+pretrained: ./model_training/base_models/yolo12l.pt
+optimizer: AdamW
+verbose: true
+seed: 42
+deterministic: true
+single_cls: true
+rect: false
+cos_lr: false
+close_mosaic: 15
+resume: model_outputs\banknote_detection_yolo12l_outputs\weights\last.pt
+amp: true
+fraction: 1.0
+profile: false
+freeze: 12
+multi_scale: false
+overlap_mask: true
+mask_ratio: 4
+dropout: 0.1
+val: true
+split: val
+save_json: false
+conf: null
+iou: 0.7
+max_det: 300
+half: false
+dnn: false
+plots: true
+source: null
+vid_stride: 1
+stream_buffer: false
+visualize: false
+augment: false
+agnostic-nms: false
+classes: null
+retina_masks: false
+embed: null
+show: false
+save_frames: false
+save_txt: false
+save_conf: false
+save_crop: false
+show_labels: true
+show_conf: true
+show_boxes: true
+line_width: null
+format: torchscript
+keras: false
+optimize: false
+int8: false
+dynamic: false
+simplify: true
+opset: null
+workspace: null
+nms: false
+lr0: 0.0015
+lrf: 0.1
+momentum: 0.937
+weight_decay: 0.008
+warmup_epochs: 5
+warmup_momentum: 0.8
+warmup_bias_lr: 0.1
+box: 9.0
+cls: 0.25
+dfl: 2
+pose: 12.极
+kobj: 1.0
+nbs: 64
+hsv_h: 0.01
+hsv_s: 0.5
+极v: 0.3
+degrees: 8.0
+translate: 0.15
+scale: 0.8
+shear: 1.5
+perspective: 0.0008
+flipud: 0.0
+fliplr: 0.5
+bgr: 0.0
+mosaic: 极.5
+mixup: 0.15
+cutmix: 0.0
+copy_paste: 0.15
+copy_paste_mode: flip
+auto_augment: randaugment
+erasing: 0.2
+cfg: null
+tracker: botsort.yaml
+save_dir: model_outputs\banknote_detection_yolo12l_outputs</pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Experiment 4: YOLO12l Fine-tuned -->
+                    <div class="experiment-card">
+                        <div class="experiment-header">
+                            <div class="model-name">YOLO12l Fine-tuned</div>
+                            <div class="status-badge status-fine-tuned">Fine-tuned</div>
+                        </div>
+                        
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">0.9806</div>
+                                <div class="metric-label">mAP50</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 98.06%"></div></div>
+                            </div>
+                           <div class="metric-item">
+                                <div class="metric-value">0.7432</div>
+                                <div class="metric-label">mAP50-95</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 74.32%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9802</div>
+                                <div class="metric-label">Precision</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 98.02%"></div></div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">0.9589</div>
+                                <div class="metric-label">Recall</div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: 95.89%"></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="config-details">
+                            <strong>Key Config:</strong> Fine-tuned from best.pt, freeze=10, epochs=50
+                            <br><strong>Inference Speed:</strong> 61.6ms per image (slower)
+                        </div>
+                        
+                        <div class="performance-note">
+                            <strong>Performance Analysis:</strong> Similar performance to base YOLO12l but with slower inference. Fine-tuning showed marginal improvements in recall but introduced inference speed penalty.
+                        </div>
+                        
+                        <!-- YOLO12l Fine-tuned Images -->
+                        <div class="experiment-images">
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/p2axunimslew4bm9k4e8j/confusion_matrix.png?rlkey=h8e1uyev7e01x3ty9bszj2m1l&st=xht7swod&raw=1" alt="YOLO12l Fine-tuned Confusion Matrix">
+                                <div class="image-caption">Confusion Matrix - YOLO12l Fine-tuned</div>
+                            </div>
+                            <div class="image-container">
+                                <img src="https://www.dropbox.com/scl/fi/5wwsrn2f813wlesbwo241/results.png?rlkey=2lqg674q23j2wy8ucnw50tavq&st=v111m6id&raw=1" alt="YOLO12l Fine-tuned Training Results">
+                                <div class="image-caption">Training Results - YOLO12l Fine-tuned</div>
+                            </div>
+                        </div>
+                        
+                        <div class="training-args-toggle">
+                            <button class="toggle-btn" onclick="toggleArgs('yolo12l-ft-args')">Show Training Arguments</button>
+                        </div>
+                        
+                        <div id="yolo12l-ft-args" class="training-args">
+                            <pre>task: detect
+mode: train
+model: ./model_outputs/banknote_detection_yolo12l_outputs/weights/best.pt
+data: ./annotated_banknote_dataset/data.yaml
+epochs: 50
+time: null
+patience: 10
+batch: 0.9
+imgsz: 860
+save: true
+save_period: -1
+cache: disk
+device: '0'
+workers: 6
+project: ./model_outputs
+name: banknote_detection_yolo12l_resume_outputs
+exist_ok: true
+pretrained: ./model_outputs/banknote_detection_yolo12l_outputs/weights/best.pt
+optimizer: AdamW
+verbose: true
+seed: 0
+deterministic: true
+single_cls: true
+rect: false
+cos_lr: false
+close_mosaic: 10
+resume: false
+amp: true
+fraction: 1.0
+profile: false
+freeze: 10
+multi_scale: false
+overlap_mask: true
+mask_ratio: 4
+dropout: 0.1
+val: true
+split: val
+save_json: false
+conf: null
+iou: 0.7
+max_det: 300
+half: false
+dnn: false
+plots: true
+source: null
+vid_stride: 1
+stream_buffer: false
+visualize: false
+augment: false
+agnostic-nms: false
+classes: null
+retina_masks: false
+embed:极l
+show: false
+save_frames: false
+save_txt: false
+save_conf: false
+save_crop: false
+show_labels: true
+show_conf: true
+show_boxes: true
+line_width: null
+format: torchscript
+keras: false
+optimize: false
+int8: false
+dynamic: false
+simplify: true
+opset: null
+workspace: null
+nms: false
+lr0: 0.002
+lrf: 0.05
+momentum: 0.937
+weight_decay: 0.006
+warmup_epochs: 3
+warmup_momentum: 0.8
+warmup_bias_lr: 0.1
+box: 8.5
+cls: 0.25
+dfl: 2.0
+pose: 12.0
+kobj: 1.0
+nbs: 64
+hsv_h: 0.01
+hsv_s: 0.4
+hsv_v: 0.25
+degrees: 6.0
+translate: 0.15
+scale: 0.85
+shear: 0.8
+perspective: 0.0008
+flipud: 0.0
+fliplr: 0.5
+bgr: 0.0
+mosaic: 0.6
+mixup: 0.1
+cutmix: 0.0
+copy_paste: 0.0
+copy_paste_mode: flip
+auto_augment: randaugment
+erasing: 0.1
+cfg: null
+tracker: botsort.yaml
+save_dir: model_outputs\banknote_detection_yolo12l_resume_outputs</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comparison Table -->
+            <div class="section">
+                <h2>📊 Comparative Performance Analysis</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>mAP50</th>
+                            <th>mAP50-95</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>Inference Speed (ms)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>YOLO11l</strong></td>
+                            <td class="best-score">0.9869</td>
+                            <td class="best-score">0.8371</td>
+                            <td class="best-score">0.9981</td>
+                            <td>0.9519</td>
+                            <td>29.29</td>
+                            <td>Completed</td>
+                        </tr>
+                        <tr style="background: #d4edda;">
+                            <td><strong>YOLO11x ⭐</strong></td>
+                            <td>0.9838</td>
+                            <td>0.7572</td>
+                            <td>0.9872</td>
+                            <td>0.9499</td>
+                            <td>34.02</td>
+                            <td>Early Stopped</td>
+                        </tr>
+                        <tr>
+                            <td><strong>YOLO12l</strong></td>
+                            <td>0.9798</td>
+                            <td>0.7420</td>
+                            <td>0.9930</td>
+                            <td>0.9535</td>
+                            <td class="best-score">27.18</td>
+                            <td>Completed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>YOLO12l Fine-tuned</strong></td>
+                            <td>0.9806</td>
+                            <td>0.7432</td>
+                            <td>0.9802</td>
+                            <td class="best-score">0.9589</td>
+                            <td>61.61</td>
+                            <td>Fine-tuned</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="recommendations">
+                <h2>🎯 Recommendations & Next Steps</h2>
+                
+                <div class="recommendation-item">
+                    <h3>✅ Primary Recommendation: Deploy YOLO11x</h3>
+                    <p><strong>Rationale:</strong> YOLO11x demonstrates the optimal balance between accuracy and practical reliability. With 98.38% mAP50 and minimal false positives, it provides robust banknote detection suitable for production deployment.</p>
+                </div>
+                
+                <div class="recommendation-item">
+                    <h3>🔧 Implementation Strategy</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>Deploy YOLO11x as primary detection model</li>
+                        <li>Implement confidence threshold of 0.6 for balanced sensitivity</li>
+                        <li>Monitor performance in production environment</li>
+                        <li>Collect edge cases for continuous model improvement</li>
+                    </ul>
+                </div>
+                
+                <div class="recommendation-item">
+                    <h3>📈 Future Improvements</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>Expand dataset with challenging scenarios and edge cases</li>
+                        <li>Investigate ensemble methods combining YOLO11x with YOLO12l</li>
+                        <li>Implement real-time performance monitoring</li>
+                        <li>Consider model quantization for deployment optimization</li>
+                    </ul>
+                </div>
+                
+                <div class="recommendation-item">
+                    <h3>⚠️ Risk Mitigation</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>Establish human-in-the-loop validation for critical applications</li>
+                        <li>Implement fallback detection mechanisms</li>
+                        <li>Regular model retraining with new data</li>
+                        <li>Performance monitoring dashboards</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Technical Details -->
+            <div class="section">
+                <h2>🔧 Technical Implementation Details</h2>
+                
+                <div class="technical-specs">
+                    <h3>Hardware & Environment:</h3>
+                    • GPU: CUDA-enabled device with 8GB VRAM<br>
+                    • Framework: Ultralytics YOLO with PyTorch backend<br>
+                    • Precision: Mixed precision (AMP) with half-precision inference<br>
+                    • Optimization: Backbone freezing for efficient transfer learning<br><br>
+                    
+                    <h3>Model Configuration (YOLO11x - Recommended):</h3>
+                    • Architecture: YOLOv11x with 10-layer backbone freezing<br>
+                    • Input Resolution: 640x640 pixels<br>
+                    • Batch Size: Auto-scaling (0.9 factor)<br>
+                    • Optimizer: AdamW with cyclical learning rate<br>
+                    • Augmentations: Moderate augmentation strategy<br>
+                    • Training Duration: 30 epochs (early stopping applied)<br><br>
+                    
+                    <h3>Deployment Specifications:</极>
+                    • Confidence Threshold: 0.6<br>
+                    • IoU Threshold: 0.55<br>
+                    • Expected Inference Speed: ~34ms per image<br>
+                    • Memory Requirements: ~2GB GPU memory for inference
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleArgs(id) {
+            const argsDiv = document.getElementById(id);
+            const button = argsDiv.previousElementSibling.querySelector('.toggle-btn');
+            
+            if (argsDiv.style.display === 'block') {
+                argsDiv.style.display = 'none';
+                button.textContent = 'Show Training Arguments';
+            } else {
+                argsDiv.style.display = 'block';
+                button.textContent = 'Hide Training Arguments';
+            }
+        }
+    </script>
+</body>
+</html>

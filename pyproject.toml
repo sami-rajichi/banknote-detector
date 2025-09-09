@@ -1,0 +1,36 @@
+[project]
+name = "banknote-detector"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ultralytics>=8.3.191",
+    "torch",
+    "torchvision",
+    "onnx>=1.12.0",
+    "onnxslim>=0.1.65",
+    "onnxruntime-gpu>=1.22.0",
+    "tensorflow>=2.20.0",
+    "tensorrt",
+    "tf-keras>=2.20.1",
+    "sng4onnx>=1.0.4",
+    "onnx-graphsurgeon>=0.5.8",
+    "onnx2tf>=1.28.2",
+    "tensorrt-cu12>=10.13.3.9",
+    "tensorrt-lean-cu12>=10.13.3.9",
+    "tensorrt-dispatch-cu12>=10.13.3.9",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu128" },
+]
+torchvision = [
+  { index = "pytorch-cu128" },
+]
