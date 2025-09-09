@@ -157,23 +157,42 @@ All models evaluated with standardized parameters:
 ## Project Structure
 
 ```
-banknote_detector/
-├── live_camera_stream.py          # Main real-time detection script
-├── main.py                        # Entry point
-├── pyproject.toml                 # Project configuration
-├── uv.lock                        # Dependency lock file
-├── model_outputs/                 # Trained model outputs
+banknote-detector/
+├── .git/                           # Git repository
+├── .gitattributes                  # Git attributes
+├── .gitignore                      # Git ignore rules
+├── .python-version                 # Python version specification
+├── .venv/                          # Virtual environment
+├── LICENSE                         # Project license
+├── README.md                       # Project documentation
+├── pyproject.toml                  # Project configuration
+├── uv.lock                         # Dependency lock file
+├── live_camera_stream.py           # Main real-time detection script
+├── banknote_detection_model_evaluation_report.html  # Evaluation report
+├── yolo_export_formats_guide.md    # Export formats guide
+├── annotated_banknote_dataset/     # Dataset (not included)
+├── exported_models/                # Exported model formats
+│   ├── yolo11x_banknote/
+│   │   ├── onnx/
+│   │   └── tensorrt/
+├── helpers/                        # Helper scripts
+│   ├── copy_dataset_files.py
+│   ├── create_val_split_from_test_split.py
+│   ├── delete_npy_files.py
+│   └── edit_labels_to_one_label.py
+├── model_outputs/                  # Trained model outputs
 │   ├── banknote_detection_yolo11x_outputs/
 │   │   ├── weights/
-│   │   │   ├── best.pt           # Best model weights
-│   │   │   └── last.pt           # Last epoch weights
-│   │   └── results.png           # Training curves
-├── model_training/               # Training utilities
-│   ├── base_models/              # Pre-trained YOLO models
-│   ├── model_training.py         # Main training script
-│   └── hyperparameters_tuning.py # Optimization scripts
-├── annotated_banknote_dataset/   # Dataset (not included)
-└── banknote_detection_model_evaluation_report.html
+│   │   │   ├── best.pt            # Best model weights
+│   │   │   └── last.pt            # Last epoch weights
+│   │   └── results.png            # Training curves
+├── model_training/                # Training utilities
+│   ├── base_models/               # Pre-trained YOLO models
+│   ├── model_training.py          # Main training script
+│   ├── model_exportation.py       # Model export script
+│   ├── hyperparameters_tuning.py  # Hyperparameter optimization
+│   ├── optimal_workers.py         # Worker optimization
+│   └── create_val_split_from_test_split.py
 ```
 
 ## Dependencies
